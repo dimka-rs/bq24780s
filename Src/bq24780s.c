@@ -65,4 +65,29 @@ void bq24780s_print_reg(uint16_t MemAddress)
     HAL_UART_Transmit(huart, regprint, 12, 100);
 }
 
+void bq24780s_dump_regs()
+{
+    uint8_t regs[]={
+        BQ24780S_CHARGE_OPTION_0,
+        BQ24780S_CHARGE_OPTION_1,
+        BQ24780S_CHARGE_OPTION_2,
+        BQ24780S_CHARGE_OPTION_3,
+        BQ24780S_PROCHOT_OPTION_0,
+        BQ24780S_PROCHOT_OPTION_1,
+        BQ24780S_PROCHOT_STATUS,
+        BQ24780S_CHARGE_CURRENT,
+        BQ24780S_CHARGE_VOLTAGE,
+        BQ24780S_DISCHARGE_CURRENT,
+        BQ24780S_INPUT_CURRENT,
+        BQ24780S_MANUFACTURER_ID,
+        BQ24780S_DEVICE_ID,
+        NULL };
+    uint8_t * preg = &regs;
+
+    while(*preg != NULL){
+        bq24780s_print_reg(*preg);
+        preg++;
+    }
+}
+
 

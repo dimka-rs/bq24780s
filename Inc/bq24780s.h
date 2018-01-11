@@ -1,7 +1,10 @@
 #ifndef _BQ24780S_H_
 #define _BQ24780S_H_
 
+/* device slave address */
 #define BQ24780S_SLAVE_ADDRESS      0x12
+
+/* registers */
 #define BQ24780S_CHARGE_OPTION_0    0x12
 #define BQ24780S_CHARGE_OPTION_1    0x3b
 #define BQ24780S_CHARGE_OPTION_2    0x38
@@ -18,5 +21,6 @@
 
 void bq24780s_init(I2C_HandleTypeDef * init_hi2c, UART_HandleTypeDef * init_huart);
 void bq24780s_print_reg(uint16_t MemAddress);
+void bq24780s_dump_regs();
 
 #endif
