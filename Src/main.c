@@ -52,6 +52,11 @@ UART_HandleTypeDef huart1;
 
 /* USER CODE BEGIN PV */
 /* Private variables ---------------------------------------------------------*/
+#define RX_BUF_SIZE 20
+uint8_t rx_buf[RX_BUF_SIZE];
+uint8_t rx_cnt = 0;
+uint8_t enter = 0;
+uint8_t newline[] = "\n\r>";
 
 /* USER CODE END PV */
 
@@ -67,6 +72,18 @@ static void MX_USART1_UART_Init(void);
 /* USER CODE END PFP */
 
 /* USER CODE BEGIN 0 */
+void HAL_UART_RxCpltCallback ( UART_HandleTypeDef *  huart )
+{
+    if(huart == &huart1){
+        HAL_UART_Transmit_IT(&huart1, &rx_buf[rx_cnt], 1);
+        if(rx_buf[rx_cnt] == '\r') {
+            enter = 1;
+        } else {
+            if(rx_cnt < RX_BUF_SIZE) rx_cnt++;
+            HAL_UART_Receive_IT(&huart1, &rx_buf[rx_cnt], 1);
+        }
+    }
+}
 
 /* USER CODE END 0 */
 
@@ -99,17 +116,31 @@ int main(void)
   MX_USART1_UART_Init();
 
   /* USER CODE BEGIN 2 */
-    uint8_t msg[] = "Start\r\n\0";
-    HAL_UART_Transmit(&huart1, msg, sizeof(msg), 1000);
     bq24780s_init(&hi2c1, &huart1);
-    bq24780s_dump_regs();
+    HAL_UART_Transmit(&huart1, newline, sizeof(newline), 100);
 
+    /* start uart1 rx */
+    HAL_UART_Receive_IT(&huart1, &rx_buf[rx_cnt], 1);
   /* USER CODE END 2 */
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
   while (1)
   {
+        if(enter) {
+            enter = 0;
+            if(rx_cnt != 7) {
+                rx_cnt += 0x30;
+                HAL_Delay(100);
+                HAL_UART_Transmit_IT(&huart1, newline, sizeof(newline));
+            } else {
+                // parse cmd
+                bq24780s_dump_regs();
+            }
+            rx_cnt = 0;
+            HAL_UART_Receive_IT(&huart1, &rx_buf[rx_cnt], 1);
+        }
+
   /* USER CODE END WHILE */
 
   /* USER CODE BEGIN 3 */

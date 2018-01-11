@@ -3,7 +3,7 @@
 
 
 I2C_HandleTypeDef * hi2c;
-UART_HandleTypeDef * huart; 
+UART_HandleTypeDef * huart;
 
 void bq24780s_read_word(uint16_t MemAddress,  uint8_t * pData)
 {
@@ -13,14 +13,31 @@ void bq24780s_read_word(uint16_t MemAddress,  uint8_t * pData)
     uint32_t Timeout = 100;
 
     HAL_I2C_Mem_Read(
-            hi2c,
-            DevAddress,
-            MemAddress,
-            MemAddSize,
-            pData,
-            Size,
-            Timeout);
+        hi2c,
+        DevAddress,
+        MemAddress,
+        MemAddSize,
+        pData,
+        Size,
+        Timeout);
 
+}
+
+void bq24780s_write_word(uint16_t MemAddress,  uint8_t * pData)
+{
+    uint16_t DevAddress = BQ24780S_SLAVE_ADDRESS;
+    uint16_t MemAddSize = 1;
+    uint16_t Size = 2;
+    uint32_t Timeout = 100;
+
+    HAL_I2C_Mem_Write (
+        hi2c,
+        DevAddress,
+        MemAddress,
+        MemAddSize,
+        pData,
+        Size,
+        Timeout);
 }
 
 void bq24780s_init(I2C_HandleTypeDef * init_hi2c, UART_HandleTypeDef * init_huart)

@@ -20,6 +20,8 @@
 #define BQ24780S_DEVICE_ID          0xff
 
 void bq24780s_init(I2C_HandleTypeDef * init_hi2c, UART_HandleTypeDef * init_huart);
+void bq24780s_write_word(uint16_t MemAddress, uint8_t * RegValue);
+void bq24780s_read_word(uint16_t MemAddress, uint8_t * RegValue);
 void bq24780s_print_reg(uint16_t MemAddress);
 void bq24780s_dump_regs();
 
