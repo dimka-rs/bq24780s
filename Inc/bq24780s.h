@@ -16,6 +16,6 @@
 #define BQ24780S_MANUFACTURER_ID    0xfe
 #define BQ24780S_DEVICE_ID          0xff
 
-void bq24780s_init(SMBUS_HandleTypeDef * init_hsmbus, UART_HandleTypeDef * init_huart);
+void bq24780s_init(I2C_HandleTypeDef * init_hi2c, UART_HandleTypeDef * init_huart);
 
 #endif

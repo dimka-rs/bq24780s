@@ -67,11 +67,11 @@ void HAL_MspInit(void)
   /* USER CODE END MspInit 1 */
 }
 
-void HAL_SMBUS_MspInit(SMBUS_HandleTypeDef* hsmbus)
+void HAL_I2C_MspInit(I2C_HandleTypeDef* hi2c)
 {
 
   GPIO_InitTypeDef GPIO_InitStruct;
-  if(hsmbus->Instance==I2C1)
+  if(hi2c->Instance==I2C1)
   {
   /* USER CODE BEGIN I2C1_MspInit 0 */
 
@@ -100,10 +100,10 @@ void HAL_SMBUS_MspInit(SMBUS_HandleTypeDef* hsmbus)
 
 }
 
-void HAL_SMBUS_MspDeInit(SMBUS_HandleTypeDef* hsmbus)
+void HAL_I2C_MspDeInit(I2C_HandleTypeDef* hi2c)
 {
 
-  if(hsmbus->Instance==I2C1)
+  if(hi2c->Instance==I2C1)
   {
   /* USER CODE BEGIN I2C1_MspDeInit 0 */
 
