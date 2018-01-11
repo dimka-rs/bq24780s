@@ -102,6 +102,7 @@ int main(void)
     uint8_t msg[] = "Start\r\n\0";
     HAL_UART_Transmit(&huart1, msg, sizeof(msg), 1000);
     bq24780s_init(&hi2c1, &huart1);
+    bq24780s_print_reg(BQ24780S_DEVICE_ID);
 
   /* USER CODE END 2 */
 

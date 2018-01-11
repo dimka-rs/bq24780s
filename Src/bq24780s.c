@@ -5,16 +5,14 @@
 I2C_HandleTypeDef * hi2c;
 UART_HandleTypeDef * huart; 
 
-uint8_t bq24780s_read_word(uint8_t regnum,  uint8_t * pData)
+void bq24780s_read_word(uint16_t MemAddress,  uint8_t * pData)
 {
     uint16_t DevAddress = BQ24780S_SLAVE_ADDRESS;
-    uint16_t MemAddress = BQ24780S_MANUFACTURER_ID;
     uint16_t MemAddSize = 1;
     uint16_t Size = 2;
     uint32_t Timeout = 100;
-    HAL_StatusTypeDef rc;
 
-    rc = HAL_I2C_Mem_Read(
+    HAL_I2C_Mem_Read(
             hi2c,
             DevAddress,
             MemAddress,
@@ -23,11 +21,6 @@ uint8_t bq24780s_read_word(uint8_t regnum,  uint8_t * pData)
             Size,
             Timeout);
 
-   if (rc == HAL_OK) {
-       return 0;
-   } else {
-       return 1;
-   }
 }
 
 void bq24780s_init(I2C_HandleTypeDef * init_hi2c, UART_HandleTypeDef * init_huart)
@@ -35,12 +28,41 @@ void bq24780s_init(I2C_HandleTypeDef * init_hi2c, UART_HandleTypeDef * init_huar
     hi2c = init_hi2c;
     huart = init_huart;
     HAL_UART_Transmit(huart, "bq24780s init\n\r\0", 16, 100);
-    uint8_t rcval[2];
-    uint8_t rc = bq24780s_read_word(BQ24780S_DEVICE_ID, rcval);
-    rc += 0x30; //printable digit
-    //rcval[0] += 0x20;
-    rcval[1] += 0x30;
-    HAL_UART_Transmit(huart, &rc, 1, 100);
-    HAL_UART_Transmit(huart, rcval, 2, 100);
 }
+
+void bytetostr(uint8_t byte, uint8_t * str)
+{
+    uint8_t upper = byte / 16;
+    uint8_t lower = byte % 16;
+    if (upper > 9) {
+        str[0] = upper + 0x37;
+    } else {
+        str[0] = upper + 0x30;
+    }
+
+    if (lower > 9) {
+        str[1] = lower + 0x37;
+    } else {
+        str[1] = lower + 0x30;
+    }
+}
+
+void bq24780s_print_reg(uint16_t MemAddress)
+{
+    uint8_t regval[2];
+    bq24780s_read_word(MemAddress, &regval);
+    uint8_t regprint[12];
+    regprint[0]='0';
+    regprint[1]='x';
+    bytetostr(MemAddress, &regprint[2]);
+    regprint[4]=':';
+    regprint[5]=' ';
+    bytetostr(regval[1], &regprint[6]);
+    bytetostr(regval[0], &regprint[8]);
+    regprint[10]='\r';
+    regprint[11]='\n';
+
+    HAL_UART_Transmit(huart, regprint, 12, 100);
+}
+
 
