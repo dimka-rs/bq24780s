@@ -56,7 +56,9 @@ UART_HandleTypeDef huart1;
 uint8_t rx_buf[RX_BUF_SIZE];
 uint8_t rx_cnt = 0;
 uint8_t enter = 0;
-uint8_t newline[] = "\n\r>";
+uint8_t prompt[] = "\n\r>";
+uint8_t crlf[] = "\n\r";
+uint8_t msg_wrong_ascii[] = "\r\nWrong ascii!\r\n";
 
 /* USER CODE END PV */
 
@@ -85,6 +87,23 @@ void HAL_UART_RxCpltCallback ( UART_HandleTypeDef *  huart )
     }
 }
 
+uint8_t atob(uint8_t * ascii, uint8_t * result)
+{
+    uint8_t byte[2];
+    for(uint8_t i = 0; i < 2; i++) {
+        if(ascii[i] >= '0' && ascii[i] <= '9') {
+            byte[i] = ascii[i] - '0'; //char 0-9 to hex
+        } else if(ascii[i] >= 'A'  && ascii[i] <= 'F') {
+            byte[i] = ascii[i] - 'A' + 10; //char A-F to hex
+        } else if(ascii[i] >= 'a' && ascii[i] <= 'f') {
+            byte[i] = ascii[i] - 'a' + 10; //char a-f to hex
+        } else {
+            return 0; //wrong ascii
+        }
+    }
+    *result = byte[0]*16 + byte[1];
+    return 1;
+}
 /* USER CODE END 0 */
 
 int main(void)
@@ -117,7 +136,7 @@ int main(void)
 
   /* USER CODE BEGIN 2 */
     bq24780s_init(&hi2c1, &huart1);
-    HAL_UART_Transmit(&huart1, newline, sizeof(newline), 100);
+    HAL_UART_Transmit(&huart1, prompt, sizeof(prompt), 100);
 
     /* start uart1 rx */
     HAL_UART_Receive_IT(&huart1, &rx_buf[rx_cnt], 1);
@@ -129,15 +148,29 @@ int main(void)
   {
         if(enter) {
             enter = 0;
-            if(rx_cnt != 7) {
-                rx_cnt += 0x30;
-                HAL_Delay(100);
-                HAL_UART_Transmit_IT(&huart1, newline, sizeof(newline));
-            } else {
-                // parse cmd
+            HAL_Delay(10); //wait until echo is sent
+            if(rx_cnt == 0) {
+                HAL_UART_Transmit(&huart1, crlf, sizeof(crlf), 100);
                 bq24780s_dump_regs();
+                HAL_UART_Transmit_IT(&huart1, prompt, sizeof(prompt));
+            } else if(rx_cnt == 7 && rx_buf[2] == '=') {
+                //convert ascii
+                uint8_t rc;
+                uint16_t MemAddress;
+                uint8_t Data[2];
+                rc  = atob(&rx_buf[0], (uint8_t*) &MemAddress);
+                rc += atob(&rx_buf[3], &Data[1]); //MSByte last
+                rc += atob(&rx_buf[5], &Data[0]); //LSByte first
+                if(rc != 3) {
+                    HAL_UART_Transmit(&huart1, msg_wrong_ascii, sizeof(msg_wrong_ascii), 100);
+                } else {
+                    bq24780s_write_word(MemAddress, &Data);
+                    HAL_UART_Transmit(&huart1, crlf, sizeof(crlf), 100);
+                    bq24780s_dump_regs();
+                }
             }
             rx_cnt = 0;
+            HAL_UART_Transmit_IT(&huart1, prompt, sizeof(prompt));
             HAL_UART_Receive_IT(&huart1, &rx_buf[rx_cnt], 1);
         }
 
