@@ -44,7 +44,7 @@ void bq24780s_init(I2C_HandleTypeDef * init_hi2c, UART_HandleTypeDef * init_huar
 {
     hi2c = init_hi2c;
     huart = init_huart;
-    HAL_UART_Transmit(huart, "bq24780s init\n\r\0", 16, 100);
+    HAL_UART_Transmit(huart, (uint8_t *) "bq24780s init\n\r\0", 16, 100);
 }
 
 void bytetostr(uint8_t byte, uint8_t * str)
@@ -67,19 +67,20 @@ void bytetostr(uint8_t byte, uint8_t * str)
 void bq24780s_print_reg(uint16_t MemAddress)
 {
     uint8_t regval[2];
-    bq24780s_read_word(MemAddress, &regval);
-    uint8_t regprint[12];
+    bq24780s_read_word(MemAddress, regval);
+    uint8_t regprint[13];
     regprint[0]='0';
     regprint[1]='x';
     bytetostr(MemAddress, &regprint[2]);
-    regprint[4]=':';
-    regprint[5]=' ';
-    bytetostr(regval[1], &regprint[6]);
-    bytetostr(regval[0], &regprint[8]);
-    regprint[10]='\r';
-    regprint[11]='\n';
+    regprint[4]='=';
+    regprint[5]='0';
+    regprint[6]='x';
+    bytetostr(regval[1], &regprint[7]);
+    bytetostr(regval[0], &regprint[9]);
+    regprint[11]='\r';
+    regprint[12]='\n';
 
-    HAL_UART_Transmit(huart, regprint, 12, 100);
+    HAL_UART_Transmit(huart, regprint, 13, 100);
 }
 
 void bq24780s_dump_regs()
@@ -98,10 +99,12 @@ void bq24780s_dump_regs()
         BQ24780S_INPUT_CURRENT,
         BQ24780S_MANUFACTURER_ID,
         BQ24780S_DEVICE_ID,
-        NULL };
-    uint8_t * preg = &regs;
+        0 };
+    uint8_t * preg = regs;
+    uint8_t newline[] = { '\r', '\n'};
+    HAL_UART_Transmit(huart, newline, 2, 100);
 
-    while(*preg != NULL){
+    while(*preg != 0){
         bq24780s_print_reg(*preg);
         preg++;
     }
