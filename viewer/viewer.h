@@ -1,6 +1,11 @@
 #ifndef _VIEWER_H_
 #define _VIEWER_H_
 
+#define NUM_OF_REGS 13
+
+uint16_t LastData[NUM_OF_REGS];
+uint16_t CurrData[NUM_OF_REGS];
+
 uint16_t ExampleData[] = {
     0xE108,
     0xC210,
@@ -31,7 +36,7 @@ uint8_t Regs[] = {
     0xFE,
     0xFF };
 
-uint8_t RegNames[][20] = {
+uint8_t RegNames[][18] = {
     "ChargeOption0",
     "ChargeOption1",
     "ChargeOption2",
