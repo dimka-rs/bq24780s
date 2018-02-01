@@ -10,6 +10,27 @@ uint8_t SerialPort[]="/dev/ttyUSB0";
 uint8_t CmdDump[]="\r";
 #define LINE_BUFFER_SIZE 16
 uint8_t LineBuffer[LINE_BUFFER_SIZE];
+#define ROW_MIN 2
+#define ROW_MAX 14
+#define COL_MIN 19
+#define COL_MAX 79
+#define V_STEP 1
+#define H_STEP 4
+uint8_t crow = ROW_MIN;
+uint8_t ccol = COL_MIN;
+uint8_t ireg, ibit;
+
+#define DBG_ROW 16
+#define DBG_COL 70
+
+void DbgPrn(uint8_t * DbgStr)
+{
+    uint8_t prow, pcol;
+    getyx(stdscr, prow, pcol);
+    move(DBG_ROW, DBG_COL);
+    addstr(DbgStr);
+    move(prow, pcol);
+}
 
 int8_t GetRegOffset(uint8_t RegAddr)
 {
@@ -48,7 +69,8 @@ void Redraw()
     clear();
     move(0,32);
     attrset(COLOR_PAIR(1));
-    addstr("BQ24780s Register Monitor\n");
+    addstr("BQ24780s Register Monitor");
+    move(1,0);
     /* Reg header */
     attron(A_BOLD);
     attron(COLOR_PAIR(3));
@@ -67,6 +89,9 @@ void Redraw()
         }
         PrintReg(i);
     }
+    move(16,0);
+    addstr("arrows - move, space - invert bit, r - read, w - write, q - quit");
+    move(crow, ccol);
     refresh();
 }
 
@@ -79,7 +104,7 @@ void ReadBQ()
         {
             //printf("> %s", LineBuffer);
             if(LineBuffer[0] == '0')
-            {    
+            {
                 //Line format: 0xAA=0xBBBB
                 //             0123456789ab
                 //terminate str parts
@@ -96,14 +121,32 @@ void ReadBQ()
     }
 }
 
+void FlipBit()
+{
+    uint8_t cbit;
+    ireg = crow - ROW_MIN;
+    ibit = (ccol - COL_MIN) / 4;
+    cbit = CurrData[ireg] & (1 << ibit);
+    if(cbit == 0)
+    {
+        DbgPrn("0 -> 1");
+        addch('1');
+        CurrData[ireg] |= (1 << ibit);
+    } else {
+        DbgPrn("1 -> 0");
+        addch('0');
+        CurrData[ireg] &= (0 << ibit);
+    }
+}
+
 
 int main()
 {
-    uint8_t ch;
+    uint16_t ch;
     initscr();
     start_color();
     //curs_set(0);          //don't need it
-    //use_default_colors(); //its even worse! 
+    //use_default_colors(); //its even worse!
 
     init_pair(1, COLOR_WHITE, COLOR_BLACK);     //1 - odd lines
     init_pair(2, COLOR_YELLOW, COLOR_BLACK);    //2 - even lines
@@ -111,22 +154,39 @@ int main()
 
     //ReadBQ(); //temporarily zero it to see how read goes
     memset(CurrData, 0, NUM_OF_REGS * sizeof(uint16_t));
-    
+
     Redraw();
-    while(1) {
+    keypad(stdscr,TRUE);
+    noecho();
+    do {
         ch = getch();
-        //TODO: switch-case
-        if (ch == 'q') {
-            break;
-        } else if (ch == 'r') {
-            ReadBQ();
-            Redraw();
-        } else if (ch == 'w'){
-            //TODO: write to port
-        } else {
-            //do nothing
+        switch(ch)
+        {
+            case 'r':
+                ReadBQ();
+                Redraw();
+                break;
+            case 'w':
+                printf("Write!\r\n");
+                break;
+            case ' ':
+                FlipBit();
+                break;
+            case KEY_LEFT:
+                if(ccol > COL_MIN) ccol -= H_STEP;
+                break;
+            case KEY_RIGHT:
+                if(ccol < COL_MAX) ccol += H_STEP;
+                break;
+            case KEY_UP:
+                if(crow > ROW_MIN) crow -= V_STEP;
+                break;
+            case KEY_DOWN:
+                if(crow < ROW_MAX) crow += V_STEP;
+                break;
         }
-    }
+        move(crow, ccol);
+    } while (ch != 'q');
     endwin();
     return 0;
 }
