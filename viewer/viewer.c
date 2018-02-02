@@ -137,6 +137,27 @@ void FlipBit()
     Redraw();
 }
 
+void WriteBQ()
+{
+    if (open_port(SerialPort) == 0)
+    {
+        for(uint8_t i = 0; i < NUM_OF_REGS; i++)
+        {
+
+            //regs 6, 11, 12 are RO
+            if(i !=6 && i != 11 && i != 12)
+            {
+                uint8_t wcmd[10];
+                sprintf(wcmd, "%x=%x\r", Regs[i], CurrData[i] );
+                write_port(wcmd);
+                //read out reply
+                while(read_port(LineBuffer, LINE_BUFFER_SIZE) > 0);
+            }
+        }
+        close_port();
+    }
+}
+
 
 int main()
 {
@@ -158,12 +179,11 @@ int main()
         ch = getch();
         switch(ch)
         {
+            case 'w':
+                WriteBQ();
             case 'r':
                 ReadBQ();
                 Redraw();
-                break;
-            case 'w':
-                printf("Write!\r\n");
                 break;
             case ' ':
                 FlipBit();
