@@ -42,7 +42,7 @@ int8_t open_port(uint8_t * SerialPort)
     return 0;
 }
 
-ssize_t write_port(uint8_t * CommandLine)
+ssize_t write_port(const uint8_t * CommandLine)
 {
     ssize_t wlen;
     

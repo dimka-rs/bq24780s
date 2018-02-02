@@ -4,7 +4,7 @@
 #define NUM_OF_REGS 13
 uint16_t CurrData[NUM_OF_REGS];
 
-uint16_t ExampleData[] = {
+const uint16_t ExampleData[] = {
     0xE108,
     0xC210,
     0x0384,
@@ -19,7 +19,7 @@ uint16_t ExampleData[] = {
     0x0040,
     0x0030 };
 
-uint8_t Regs[] = {
+const uint8_t Regs[] = {
     0x12,
     0x3B,
     0x38,
@@ -34,20 +34,20 @@ uint8_t Regs[] = {
     0xFE,
     0xFF };
 
-uint8_t RegNames[][18] = {
-    "ChargeOption0",
-    "ChargeOption1",
-    "ChargeOption2",
-    "ChargeOption3",
-    "ProchotOption0",
-    "ProchotOption1",
-    "ProchotStatus",
-    "ChargeCurrent",
-    "ChargeVoltage",
-    "DischargeCurrent",
-    "InputCurrent",
-    "ManufacturerID",
-    "DeviceID" };
+const uint8_t RegNames[][23] = {
+    "ChargeOption0 0x12",
+    "ChargeOption1 0x3B",
+    "ChargeOption2 0x38",
+    "ChargeOption3 0x37",
+    "ProchotOption0 0x3C",
+    "ProchotOption1 0x3D",
+    "ProchotStatus 0x3A",
+    "ChargeCurrent 0x14",
+    "ChargeVoltage 0x15",
+    "DischargeCurrent 0x39",
+    "InputCurrent 0x3F",
+    "ManufacturerID 0xFE",
+    "DeviceID 0xFF" };
 
 /* example dump
 0x12: E108

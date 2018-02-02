@@ -7,13 +7,13 @@
 
 
 uint8_t SerialPort[]="/dev/ttyUSB0";
-uint8_t CmdDump[]="\r";
+const uint8_t CmdDump[]="\r";
 #define LINE_BUFFER_SIZE 16
 uint8_t LineBuffer[LINE_BUFFER_SIZE];
 #define ROW_MIN 2
 #define ROW_MAX 14
-#define COL_MIN 19
-#define COL_MAX 79
+#define COL_MIN 24
+#define COL_MAX 84
 #define V_STEP 1
 #define H_STEP 4
 uint8_t crow = ROW_MIN;
@@ -47,7 +47,7 @@ int8_t GetRegOffset(uint8_t RegAddr)
 void PrintReg(uint8_t RegOffset)
 {
     attron(A_BOLD);
-    printw("%16s", RegNames[RegOffset]);
+    printw("%21s", RegNames[RegOffset]);
     attroff(A_BOLD);
     /* Reg bits */
     uint8_t bit;
@@ -67,14 +67,14 @@ void PrintReg(uint8_t RegOffset)
 void Redraw()
 {
     clear();
-    move(0,32);
+    move(0,35);
     attrset(COLOR_PAIR(1));
     addstr("BQ24780s Register Monitor");
     move(1,0);
     /* Reg header */
     attron(A_BOLD);
     attron(COLOR_PAIR(3));
-    printw("%16s", "REGS/BITS");
+    printw("%21s", "REGS/BITS");
     for(int8_t i = 15; i >= 0; i--) {
         printw("%4i", i);
     }
