@@ -2,8 +2,6 @@
 #define _VIEWER_H_
 
 #define NUM_OF_REGS 13
-
-uint16_t LastData[NUM_OF_REGS];
 uint16_t CurrData[NUM_OF_REGS];
 
 uint16_t ExampleData[] = {

@@ -130,12 +130,11 @@ void FlipBit()
 
     if(cbit == 0)
     {
-        addch('1');
         CurrData[ireg] |= (1 << ibit);
     } else {
-        addch('0');
-        CurrData[ireg] &= (0 << ibit);
+        CurrData[ireg] &= ~(1 << ibit);
     }
+    Redraw();
 }
 
 
@@ -151,9 +150,7 @@ int main()
     init_pair(2, COLOR_YELLOW, COLOR_BLACK);    //2 - even lines
     init_pair(3, COLOR_WHITE, COLOR_RED);       //3 - header
 
-    //ReadBQ(); //temporarily zero it to see how read goes
-    memset(CurrData, 0, NUM_OF_REGS * sizeof(uint16_t));
-
+    ReadBQ();
     Redraw();
     keypad(stdscr,TRUE);
     noecho();
