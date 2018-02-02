@@ -52,7 +52,7 @@ void PrintReg(uint8_t RegOffset)
     /* Reg bits */
     uint8_t bit;
     for(int8_t i = 15; i >= 0; i--) {
-        if(CurrData[0] & (1 << i)) {
+        if(CurrData[RegOffset] & (1 << i)) {
             bit = 1;
         } else {
             bit = 0;
@@ -123,17 +123,16 @@ void ReadBQ()
 
 void FlipBit()
 {
-    uint8_t cbit;
+    uint16_t cbit;
     ireg = crow - ROW_MIN;
-    ibit = (ccol - COL_MIN) / 4;
+    ibit = 15 - (ccol - COL_MIN) / 4;
     cbit = CurrData[ireg] & (1 << ibit);
+
     if(cbit == 0)
     {
-        DbgPrn("0 -> 1");
         addch('1');
         CurrData[ireg] |= (1 << ibit);
     } else {
-        DbgPrn("1 -> 0");
         addch('0');
         CurrData[ireg] &= (0 << ibit);
     }
